@@ -752,9 +752,11 @@ class Game:
                         return
             
             # 查找点击的敌人
+            world_pos_x = pos[0] + self.camera_x
+            world_pos_y = pos[1] + self.camera_y
             clicked_enemy = None
             for enemy in self.enemies:
-                dist = math.hypot(pos[0] - enemy.x, pos[1] - enemy.y)
+                dist = math.hypot(world_pos_x - enemy.x, world_pos_y - enemy.y)
                 if dist < enemy.size + 15:
                     clicked_enemy = enemy
                     break
@@ -774,7 +776,7 @@ class Game:
                 return
             else:
                 # 点击地面 - 移动
-                self.set_move_target(pos[0], pos[1])
+                self.set_move_target(world_pos_x, world_pos_y)
                 self.attack_target = None
         
         # 商店点击
