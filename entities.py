@@ -106,7 +106,7 @@ class Player:
         self.hp = self.max_hp
         self.attack += 10
         self.defense += 5
-        self.exp_to_next = int(self.exp_to_next * 1.3) # 降低增长曲线，升级更快
+        self.exp_to_next = int(self.exp_to_next * 1.2) # 降低增长曲线，升级更快
         
     def equip(self, item, slot):
         if slot == "weapon":
