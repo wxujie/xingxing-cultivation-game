@@ -806,10 +806,8 @@ class Game:
                     self.state = 'game'
                     return
             # 自动突破
-            if self.player.can_breakthrough():
-                self.player.breakthrough()
-                self.show_message(f"突破成功! 踏入{self.player.realm_name}境!")
-                self.generate_shop()
+            if self.player.can_breakthrough() and not self.boss_spawned:
+                self.start_breakthrough_challenge()
             self.state = 'game'
         
         elif self.state == "confirm":
