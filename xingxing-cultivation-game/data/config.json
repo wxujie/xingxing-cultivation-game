@@ -1,0 +1,14 @@
+{
+  "screen": {
+    "width": 1200,
+    "height": 800,
+    "fps": 60
+  },
+  "player": {
+    "base_attack_bonus": 1.5,
+    "base_defense_bonus": 1.5
+  },
+  "mechanics": {
+    "chain_trigger_chance": 0.3
+  }
+}

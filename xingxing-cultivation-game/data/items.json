@@ -1,0 +1,16 @@
+{
+  "weapons": [
+    {"name": "木剑", "attack": 8, "quality": "普通", "cost": 80},
+    {"name": "铁剑", "attack": 18, "quality": "优秀", "cost": 200},
+    {"name": "青锋剑", "attack": 35, "quality": "稀有", "cost": 500},
+    {"name": "玄冰剑", "attack": 60, "quality": "史诗", "cost": 1500},
+    {"name": "轩辕剑", "attack": 100, "quality": "传说", "cost": 5000}
+  ],
+  "armors": [
+    {"name": "布衣", "defense": 5, "quality": "普通", "cost": 80},
+    {"name": "皮甲", "defense": 12, "quality": "优秀", "cost": 200},
+    {"name": "铁甲", "defense": 25, "quality": "稀有", "cost": 500},
+    {"name": "银鳞甲", "defense": 45, "quality": "史诗", "cost": 1500},
+    {"name": "金缕玉衣", "defense": 80, "quality": "传说", "cost": 5000}
+  ]
+}
