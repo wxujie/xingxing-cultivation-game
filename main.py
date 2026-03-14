@@ -850,7 +850,7 @@ class Game:
             return
         
         # 计算提示框位置（避免超出屏幕）
-        tip_w, tip_h = 220, 120
+        tip_w, tip_h = 250, 180
         x = pos[0] + 15
         y = pos[1] + 15
         if x + tip_w > SCREEN_WIDTH:
@@ -872,28 +872,30 @@ class Game:
         
         # 类型和冷却
         skill_type = skill.get("type", "unknown")
-        cooldown = skill.get("cooldown", 0) // 1000
-        self.draw_text(f"类型:{skill_type} | 冷却:{cooldown}秒", self.small_font, (200, 200, 180), x + 10, y + 35)
+        cooldown = skill.get("cooldown", 0) / 1000
+        self.draw_text(f"类型:{skill_type} | 冷却:{cooldown:.1f}s", self.small_font, (200, 200, 180), x + 10, y + 35)
         
-        # 效果描述
-        desc = skill.get("desc", "")
-        effect_parts = []
+        # 详细效果
+        y_offset = 60
         if "damage" in skill:
-            effect_parts.append(f"伤害:{skill['damage']}")
+            self.draw_text(f"攻击: {skill['damage']}", self.small_font, (255, 100, 100), x + 10, y + y_offset)
+            y_offset += 20
         if "heal" in skill:
-            effect_parts.append(f"治疗:{skill['heal']}")
+            self.draw_text(f"治疗: {skill['heal']}", self.small_font, (100, 255, 100), x + 10, y + y_offset)
+            y_offset += 20
         if "shield" in skill:
-            effect_parts.append(f"护盾:{skill['shield']}")
+            self.draw_text(f"护盾: {skill['shield']}", self.small_font, (100, 200, 255), x + 10, y + y_offset)
+            y_offset += 20
         if "aoe" in skill and skill["aoe"]:
-            effect_parts.append("AOE")
+            self.draw_text("范围: 全体攻击", self.small_font, (255, 255, 150), x + 10, y + y_offset)
+            y_offset += 20
         if "chain" in skill:
             chain = skill["chain"]
-            if isinstance(chain, list):
-                chain = chain[0] if chain else "无"
-            effect_parts.append(f"链:{chain}")
-        
-        effect_text = " | ".join(effect_parts) if effect_parts else desc
-        self.draw_text(effect_text[:30], self.small_font, (180, 220, 180), x + 10, y + 55)
+            if isinstance(chain, list): chain = chain[0] if chain else "无"
+            self.draw_text(f"触发: {chain}", self.small_font, (255, 200, 100), x + 10, y + y_offset)
+            y_offset += 20
+            
+        self.draw_text(f"描述: {skill.get('desc', '')}", self.small_font, (200, 200, 200), x + 10, y + y_offset + 10)
         
         # 冷却时间条
         if skill_name in self.player.skill_cooldowns:
@@ -902,7 +904,7 @@ class Game:
             cd = skill.get("cooldown", 1000)
             remaining = max(0, cd - (now - last_used)) / 1000
             if remaining > 0:
-                self.draw_text(f"冷却中: {remaining:.1f}秒", self.small_font, (255, 200, 100), x + 10, y + 80)
+                self.draw_text(f"冷却中: {remaining:.1f}秒", self.small_font, (255, 200, 100), x + 10, y + 155)
     
     def draw_player_model(self, x, y):
         """绘制玩家角色模型 - 水墨武侠风格"""
