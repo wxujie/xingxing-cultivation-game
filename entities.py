@@ -139,7 +139,7 @@ class Player:
         }
 
     def can_breakthrough(self):
-        return self.realm < len(self.realms_data) - 1 and self.level >= 5
+        return self.realm < len(self.realms_data) - 1 and self.level >= 10
 
     def breakthrough(self):
         if self.can_breakthrough():

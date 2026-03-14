@@ -469,6 +469,8 @@ class Game:
         self.player = Player(char_key, CHARACTERS[char_key], REALMS, ELEMENTS)
         self.enemies = []
         self.particles = []
+        self.boss_spawned = False
+        self.breakthrough_boss = None
         for _ in range(5):
             self.enemies.append(self.create_enemy())
         self.generate_shop()
@@ -1574,6 +1576,8 @@ class Game:
                 self.draw_equipment()
             elif self.state == "handbook":
                 self.draw_handbook()
+            elif self.state == "reward_selection":
+                self.draw_reward_selection()
             elif self.state == "confirm":
                 self.draw_confirm()
             elif self.state == "esc_menu":
