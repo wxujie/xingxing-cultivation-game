@@ -1365,17 +1365,40 @@ class Game:
         self.screen.fill(PAPER)
         pygame.draw.rect(self.screen, INK_BLACK, (10, 10, SCREEN_WIDTH-20, SCREEN_HEIGHT-20), 3)
         
-        self.draw_text("技能图鉴", self.title_font, RED, SCREEN_WIDTH//2, 60, center=True)
+        self.draw_text("技能图鉴", self.title_font, RED, SCREEN_WIDTH//2, 50, center=True)
+        
+        # 按元素分组
+        groups = {}
+        for name, tech in TECHNIQUES.items():
+            elem = tech.get("element", "无")
+            if elem not in groups: groups[elem] = []
+            groups[elem].append((name, tech))
         
         # 显示技能列表
-        y = 150
-        for i, (name, tech) in enumerate(TECHNIQUES.items()):
-            if i >= 12: break # 最多显示12个
-            text = f"{name} ({tech.get('type', '未知')})"
-            self.draw_text(text, self.small_font, tech.get("color", INK_BLACK), 200, y + i * 40)
-            self.draw_text(tech.get("desc", ""), self.small_font, GRAY, 400, y + i * 40)
+        start_x = 50
+        y = 120
+        row_height = 30
+        
+        for elem, skills in groups.items():
+            self.draw_text(f"【{elem}系功法】", self.font, ELEMENTS.get(elem, {}).get("color", INK_BLACK), start_x, y)
+            y += row_height
             
-        self.draw_text("B 或 Esc 返回", self.font, INK_GRAY, SCREEN_WIDTH//2, SCREEN_HEIGHT - 50, center=True)
+            for i, (name, tech) in enumerate(skills):
+                if y > SCREEN_HEIGHT - 100: break
+                
+                # 详细信息拼接
+                info = f"{name}"
+                if "damage" in tech: info += f" | 伤害:{tech['damage']}"
+                if "heal" in tech: info += f" | 治疗:{tech['heal']}"
+                if "shield" in tech: info += f" | 护盾:{tech['shield']}"
+                info += f" | 冷却:{tech.get('cooldown', 0)/1000:.1f}s"
+                
+                self.draw_text(info, self.small_font, INK_BLACK, start_x + 20, y)
+                self.draw_text(tech.get("desc", ""), self.small_font, GRAY, start_x + 500, y)
+                y += row_height
+            y += 20
+            
+        self.draw_text("B 或 Esc 返回", self.font, INK_GRAY, SCREEN_WIDTH//2, SCREEN_HEIGHT - 40, center=True)
 
     def save_game(self):
         data = {
