@@ -296,6 +296,7 @@ class Game:
         self.camera_x = 0
         self.camera_y = 0
         self.attack_target = None
+        self.attack_anim = None
         
         # 突破相关
         self.breakthrough_boss = None
@@ -309,11 +310,6 @@ class Game:
             x = random.randint(100, WORLD_WIDTH - 100)
             y = random.randint(100, WORLD_HEIGHT - 100)
             self.map_elements.append({"type": random.choice(["tree", "rock", "river", "flower"]), "x": x, "y": y})
-        
-        # 突破相关
-        self.breakthrough_boss = None
-        self.reward_choices = []
-        self.reward_selected = False
         
         # 移动目标
         self.move_target = None
