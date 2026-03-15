@@ -175,6 +175,9 @@ class Game:
         self.handbook_tab = "金"
         self.handbook_page = 0
         
+        # Menu state
+        self.menu_buttons = []
+        
         # 突破相关
         self.breakthrough_boss = None
         self.reward_choices = []
@@ -593,21 +596,32 @@ class Game:
             self.particles.append(Particle(x, y, color, 3, 30))
     
     def handle_click(self, pos):
-        # 菜单点击 - 角色选择
+        # 菜单点击
         if self.state == "menu":
+            for name, rect in self.menu_buttons:
+                if rect[0] < pos[0] < rect[0] + rect[2] and rect[1] < pos[1] < rect[1] + rect[3]:
+                    if name == "new": self.state = "char_selection"
+                    elif name == "load": self.load_game()
+                    elif name == "handbook": self.state = "handbook"
+                    elif name == "exit": 
+                        pygame.quit()
+                        sys.exit()
+                    return
+        
+        elif self.state == "char_selection":
             # 检查角色按钮
             for elem, rect in getattr(self, 'char_buttons', []):
                 if rect[0] < pos[0] < rect[0] + rect[2] and rect[1] < pos[1] < rect[1] + rect[3]:
                     self.start_game(elem)
                     return
             
-            # 检查读取按钮
-            if hasattr(self, 'load_btn'):
-                b = self.load_btn
+            # 返回按钮
+            if hasattr(self, 'back_btn'):
+                b = self.back_btn
                 if b[0] < pos[0] < b[0] + b[2] and b[1] < pos[1] < b[1] + b[3]:
-                    self.load_game()
+                    self.state = "menu"
                     return
-        
+
         # 游戏菜单点击
         elif self.state == "esc_menu":
             for name, rect in self.esc_buttons:
@@ -748,6 +762,8 @@ class Game:
             if self.state == "menu" or self.state == "dead":
                 pygame.quit()
                 sys.exit()
+            elif self.state == "char_selection":
+                self.state = "menu"
             elif self.state == "game":
                 self.state = "esc_menu"
             elif self.state == "esc_menu":
@@ -1113,43 +1129,52 @@ class Game:
         # 标题 - 书法风格
         self.draw_text("杏杏修仙录", self.title_font, RED, SCREEN_WIDTH//2, 80, center=True)
         self.draw_text("─────────────", self.font, INK_GRAY, SCREEN_WIDTH//2, 140, center=True)
-        self.draw_text("修仙肉鸽 · 五行系统", self.font, INK_BLACK, SCREEN_WIDTH//2, 170, center=True)
         
-        # 角色选择
-        self.draw_text("选择角色", self.font, INK_BLACK, SCREEN_WIDTH//2, 230, center=True)
+        # 菜单按钮
+        menu_items = [("new", "新游戏"), ("load", "读取存档"), ("handbook", "图鉴"), ("achievements", "成就 (未开发)"), ("exit", "退出")]
+        self.menu_buttons = []
+        for i, (name, label) in enumerate(menu_items):
+            rect = (SCREEN_WIDTH//2 - 120, 250 + i * 70, 240, 50)
+            pygame.draw.rect(self.screen, PAPER, rect)
+            pygame.draw.rect(self.screen, INK_BLACK, rect, 2)
+            self.draw_text(label, self.font, INK_BLACK, SCREEN_WIDTH//2, 275 + i * 70, center=True)
+            self.menu_buttons.append((name, rect))
+
+    def draw_char_selection(self):
+        # 绘制背景
+        if self.bg_image:
+            self.screen.blit(self.bg_image, (0, 0))
+        else:
+            self.screen.fill(PAPER)
+
+        self.draw_text("选择人物", self.title_font, RED, SCREEN_WIDTH//2, 80, center=True)
         
         char_buttons = []
         elem_colors = {"金": (200, 180, 50), "木": (50, 180, 50), "水": (50, 100, 200), 
                        "火": (220, 60, 40), "土": (180, 140, 80)}
         
         for i, (elem, char) in enumerate(CHARACTERS.items()):
-            x = 180 + i * 200
-            y = 280
-            w, h = 160, 100
+            x = 100 + i * 200
+            y = 250
+            w, h = 160, 150
             
             color = elem_colors[elem]
             pygame.draw.rect(self.screen, color, (x, y, w, h), 3)
             pygame.draw.rect(self.screen, PAPER, (x+3, y+3, w-6, h-6))
             
             self.draw_text(char["name"], self.font, color, x + w//2, y + 25, center=True)
-            self.draw_text(f"{elem} · {char['desc'].split('·')[1]}", self.small_font, INK_BLACK, x + w//2, y + 55, center=True)
+            self.draw_text(f"{elem}系", self.small_font, INK_BLACK, x + w//2, y + 55, center=True)
             self.draw_text(f"攻{char['base_attack']} 防{char['base_defense']} 血{char['base_hp']}", self.small_font, GRAY, x + w//2, y + 80, center=True)
             
             char_buttons.append((elem, (x, y, w, h)))
         
         self.char_buttons = char_buttons
         
-        # 提示
-        self.draw_text("点击角色开始游戏", self.small_font, INK_GRAY, SCREEN_WIDTH//2, 420, center=True)
-        # 读取按钮
-        load_btn_rect = (SCREEN_WIDTH//2 - 60, 460, 120, 45)
-        pygame.draw.rect(self.screen, INK_BLACK, load_btn_rect, 2)
-        pygame.draw.rect(self.screen, PAPER, (load_btn_rect[0]+2, load_btn_rect[1]+2, load_btn_rect[2]-4, load_btn_rect[3]-4))
-        self.draw_text("读取存档", self.font, INK_BLACK, SCREEN_WIDTH//2, 483, center=True)
-        self.load_btn = load_btn_rect
-
-        self.draw_text("WASD移动 · 攻击 · 自动功法", self.small_font, INK_GRAY, SCREEN_WIDTH//2, 550, center=True)
-        self.draw_text("商店 · 突破 · 装备", self.small_font, INK_GRAY, SCREEN_WIDTH//2, 580, center=True)
+        back_btn = (SCREEN_WIDTH//2 - 60, SCREEN_HEIGHT - 100, 120, 50)
+        pygame.draw.rect(self.screen, PAPER, back_btn)
+        pygame.draw.rect(self.screen, INK_BLACK, back_btn, 2)
+        self.draw_text("返回", self.font, INK_BLACK, back_btn[0]+60, back_btn[1]+25, center=True)
+        self.back_btn = back_btn
     
     def draw_game(self):
         # 水墨风格背景
@@ -1529,6 +1554,8 @@ class Game:
             
             if self.state == "menu":
                 self.draw_menu()
+            elif self.state == "char_selection":
+                self.draw_char_selection()
             elif self.state == "game":
                 self.draw_game()
             elif self.state == "shop":
