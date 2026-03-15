@@ -176,6 +176,7 @@ class Game:
         self.handbook_page = 0
         
         # Menu state
+        self.menu_selection_idx = 0
         self.menu_buttons = []
         
         # 突破相关
@@ -759,7 +760,10 @@ class Game:
     
     def handle_key(self, key):
         if key == pygame.K_ESCAPE:
-            if self.state == "menu" or self.state == "dead":
+            if self.state == "menu":
+                pygame.quit()
+                sys.exit()
+            elif self.state == "dead":
                 pygame.quit()
                 sys.exit()
             elif self.state == "char_selection":
@@ -772,9 +776,24 @@ class Game:
                 # 任何子界面按 ESC 都返回 game
                 self.state = "game"
         
-        elif key == pygame.K_RETURN and self.state == "menu":
-            self.start_game()
+        elif self.state == "menu":
+            if key == pygame.K_UP:
+                self.menu_selection_idx = (self.menu_selection_idx - 1) % len(self.menu_buttons)
+            elif key == pygame.K_DOWN:
+                self.menu_selection_idx = (self.menu_selection_idx + 1) % len(self.menu_buttons)
+            elif key == pygame.K_RETURN:
+                name, _ = self.menu_buttons[self.menu_selection_idx]
+                if name == "new": self.state = "char_selection"
+                elif name == "load": self.load_game()
+                elif name == "handbook": self.state = "handbook"
+                elif name == "exit": 
+                    pygame.quit()
+                    sys.exit()
         
+        elif key == pygame.K_RETURN and self.state == "menu":
+             # This block might be redundant but keeping logic consistent
+             pass
+
         if self.state == "game":
             if key == pygame.K_b:
                 self.state = "shop"
@@ -1133,11 +1152,25 @@ class Game:
         # 菜单按钮
         menu_items = [("new", "新游戏"), ("load", "读取存档"), ("handbook", "图鉴"), ("achievements", "成就 (未开发)"), ("exit", "退出")]
         self.menu_buttons = []
+        mouse_pos = pygame.mouse.get_pos()
+        
         for i, (name, label) in enumerate(menu_items):
             rect = (SCREEN_WIDTH//2 - 120, 250 + i * 70, 240, 50)
-            pygame.draw.rect(self.screen, PAPER, rect)
-            pygame.draw.rect(self.screen, INK_BLACK, rect, 2)
-            self.draw_text(label, self.font, INK_BLACK, SCREEN_WIDTH//2, 275 + i * 70, center=True)
+            
+            # 检测鼠标悬停
+            if rect[0] < mouse_pos[0] < rect[0] + rect[2] and rect[1] < mouse_pos[1] < rect[1] + rect[3]:
+                self.menu_selection_idx = i
+                
+            is_selected = (self.menu_selection_idx == i)
+            color = (200, 200, 200) if is_selected else PAPER
+            border = RED if is_selected else INK_BLACK
+            thickness = 4 if is_selected else 2
+            
+            pygame.draw.rect(self.screen, color, rect)
+            pygame.draw.rect(self.screen, border, rect, thickness)
+            
+            label_color = RED if is_selected else INK_BLACK
+            self.draw_text(label, self.font, label_color, SCREEN_WIDTH//2, 275 + i * 70, center=True)
             self.menu_buttons.append((name, rect))
 
     def draw_char_selection(self):
