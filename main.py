@@ -73,31 +73,31 @@ REALMS = [
 # 角色选择 - 五行角色
 CHARACTERS = {
     "金": {
-        "name": "金灵子", "element": "金", "desc": "金属性 · 攻击力最强",
+        "name": "剑痴·厉沧海", "element": "金", "desc": "铸剑山庄弃徒，一生唯剑为伴，追求极致锋芒。",
         "base_attack": 15, "base_defense": 8, "base_hp": 100,
         "skills": ["金剑术", "金虹贯日", "庚金神光", "分金斩", "金甲护体", "金戈铁马", "金星爆", "金风玉露", "金榜题名", "金蝉脱壳",
                    "金汤固守", "金碧辉煌", "金玉满堂", "金石为开", "金戈之声", "金蛇狂舞", "金羽翔天", "金纹护盾", "金雷降世", "金莲绽放"]
     },
     "木": {
-        "name": "木灵子", "element": "木", "desc": "木属性 · 防御力最强",
+        "name": "药仙·苏青青", "element": "木", "desc": "隐居药谷的医修，慈悲为怀，以草木之力治愈苍生。",
         "base_attack": 10, "base_defense": 15, "base_hp": 110,
         "skills": ["木藤术", "荆棘之刺", "生命绽放", "盘根错节", "木甲护体", "万木逢春", "木叶飘零", "木桩大法", "木龙出海", "木魅幻术",
                    "森林之怒", "木灵祝福", "扎根大地", "枝繁叶茂", "木刺穿心", "绿意盎然", "木之领域", "枯木逢春", "木灵守护", "森林之王"]
     },
     "水": {
-        "name": "水灵子", "element": "水", "desc": "水属性 · 生命值最高",
+        "name": "霜月·洛冰璃", "element": "水", "desc": "北冥极地的冰雪之女，体内封印着万年玄冰之力。",
         "base_attack": 10, "base_defense": 10, "base_hp": 150,
         "skills": ["水波术", "冰封千里", "水幕天华", "滴水穿石", "水甲护体", "海纳百川", "水龙吟", "寒冰射线", "水月镜像", "水灵祝福",
                    "惊涛骇浪", "水之愈合", "冰晶雪莲", "水墨丹青", "水漫金山", "寒气逼人", "水循环", "蓝蓝的海", "水之壁垒", "波涛汹涌"]
     },
     "火": {
-        "name": "火灵子", "element": "火", "desc": "火属性 · 暴击率最高",
+        "name": "狂刀·烈焰天", "element": "火", "desc": "乱世中崛起的刀客，刀意如火，焚尽一切来犯之敌。",
         "base_attack": 14, "base_defense": 6, "base_hp": 90,
         "skills": ["火球术", "烈焰焚烧", "火凤燎原", "火焰冲击", "火甲护体", "烈焰风暴", "火眼金睛", "星火燎原", "燃尽八荒", "火德星君",
                    "祝融神火", "火舞九天", "烈焰之魂", "火龙出海", "烽火连天", "火树银花", "灼热之魂", "爆炸的艺术", "烈焰审判", "火神降世"]
     },
     "土": {
-        "name": "土灵子", "element": "土", "desc": "土属性 · 全能型",
+        "name": "苦行·石敢当", "element": "土", "desc": "大地之子，行走于荒原的行者，身如磐石，不动如山。",
         "base_attack": 12, "base_defense": 12, "base_hp": 120,
         "skills": ["土盾术", "大地守护", "地震术", "土牢术", "土甲护体", "山崩地裂", "大地脉动", "尘土飞扬", "固若金汤", "土灵祝福",
                    "移山填海", "厚土载物", "地动山摇", "土龙翻身", "稳如泰山", "尘土蔽日", "大地之怒", "岩石装甲", "土之领域", "山河破碎"]
@@ -1196,8 +1196,11 @@ class Game:
             pygame.draw.rect(self.screen, PAPER, (x+3, y+3, w-6, h-6))
             
             self.draw_text(char["name"], self.font, color, x + w//2, y + 25, center=True)
-            self.draw_text(f"{elem}系", self.small_font, INK_BLACK, x + w//2, y + 55, center=True)
-            self.draw_text(f"攻{char['base_attack']} 防{char['base_defense']} 血{char['base_hp']}", self.small_font, GRAY, x + w//2, y + 80, center=True)
+            self.draw_text(f"{elem}系", self.small_font, INK_BLACK, x + w//2, y + 50, center=True)
+            self.draw_text(f"攻{char['base_attack']} 防{char['base_defense']} 血{char['base_hp']}", self.small_font, GRAY, x + w//2, y + 75, center=True)
+            # 绘制简介 (限制长度)
+            desc = char["desc"][:15] + "..." if len(char["desc"]) > 15 else char["desc"]
+            self.draw_text(desc, self.small_font, INK_GRAY, x + w//2, y + 110, center=True)
             
             char_buttons.append((elem, (x, y, w, h)))
         
