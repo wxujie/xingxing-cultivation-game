@@ -1202,7 +1202,7 @@ class Game:
             self.screen.blit(self.bg_image, (0, 0))
             # 增加遮罩层，让文字更清晰
             overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
-            overlay.set_alpha(150)
+            overlay.set_alpha(220)
             overlay.fill((0, 0, 0))
             self.screen.blit(overlay, (0, 0))
         else:
