@@ -1210,11 +1210,11 @@ class Game:
         self.back_btn = back_btn
     
     def draw_game(self):
+        if not self.player: return
         # 水墨风格背景
         self.screen.fill(PAPER)
         
         # 计算摄像机位置 (让玩家居中)
-        self.camera_x = self.player.x - SCREEN_WIDTH // 2
         self.camera_y = self.player.y - SCREEN_HEIGHT // 2
         # 限制摄像机范围
         self.camera_x = max(0, min(WORLD_WIDTH - SCREEN_WIDTH, self.camera_x))
