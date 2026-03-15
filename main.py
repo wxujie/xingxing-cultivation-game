@@ -374,7 +374,7 @@ class Game:
             self.shop_items.append(("armor", a.copy()))
     
     def update(self):
-        if self.state != "game":
+        if self.state != "game" or self.player is None:
             return
         
         self.game_time += 1
