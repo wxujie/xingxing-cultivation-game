@@ -173,9 +173,10 @@ class Game:
         
         # Load portraits
         self.portraits = {}
-        for elem in ["金", "木", "水", "火", "土"]:
+        portrait_files = {"金": "jin.png", "木": "mu.png", "水": "shui.png", "火": "huo.png", "土": "tu.png"}
+        for elem, filename in portrait_files.items():
             try:
-                img = pygame.image.load(f"data/portraits/{elem}.png").convert_alpha()
+                img = pygame.image.load(f"data/portraits/{filename}").convert_alpha()
                 self.portraits[elem] = pygame.transform.scale(img, (300, 300))
             except:
                 self.portraits[elem] = None
