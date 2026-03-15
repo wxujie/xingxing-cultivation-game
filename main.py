@@ -171,6 +171,10 @@ class Game:
         self.attack_target = None
         self.attack_anim = None
         
+        # Handbook state
+        self.handbook_tab = "金"
+        self.handbook_page = 0
+        
         # 突破相关
         self.breakthrough_boss = None
         self.reward_choices = []
@@ -771,8 +775,21 @@ class Game:
             if key == pygame.K_e or key == pygame.K_b:
                 self.state = "game"
         elif self.state == "handbook":
-            if key == pygame.K_h or key == pygame.K_b or key == pygame.K_ESCAPE:
+            if key == pygame.K_ESCAPE or key == pygame.K_b:
                 self.state = "game"
+            elif key == pygame.K_LEFT:
+                self.handbook_page = max(0, self.handbook_page - 1)
+            elif key == pygame.K_RIGHT:
+                self.handbook_page += 1
+            elif key == pygame.K_UP or key == pygame.K_DOWN:
+                tabs = ["金", "木", "水", "火", "土", "无"]
+                idx = tabs.index(self.handbook_tab) if self.handbook_tab in tabs else 0
+                if key == pygame.K_UP:
+                    idx = (idx - 1) % len(tabs)
+                else:
+                    idx = (idx + 1) % len(tabs)
+                self.handbook_tab = tabs[idx]
+                self.handbook_page = 0
     
     def buy_item(self, idx):
         if idx < len(self.shop_items):
@@ -1369,37 +1386,38 @@ class Game:
         
         self.draw_text("技能图鉴", self.title_font, RED, SCREEN_WIDTH//2, 50, center=True)
         
-        # 按元素分组
-        groups = {}
+        # Tabs
+        tabs = ["金", "木", "水", "火", "土", "无"]
+        for i, tab in enumerate(tabs):
+            rect = (100 + i * 150, 120, 140, 40)
+            color = (180, 160, 120) if self.handbook_tab == tab else (220, 220, 220)
+            pygame.draw.rect(self.screen, color, rect)
+            pygame.draw.rect(self.screen, INK_BLACK, rect, 2)
+            self.draw_text(tab, self.font, INK_BLACK, rect[0] + 70, rect[1] + 20, center=True)
+            
+        # Get skills for current tab
+        skills = []
         for name, tech in TECHNIQUES.items():
-            elem = tech.get("element", "无")
-            if elem not in groups: groups[elem] = []
-            groups[elem].append((name, tech))
+            if tech.get("element", "无") == self.handbook_tab:
+                skills.append((name, tech))
         
-        # 显示技能列表
-        start_x = 50
-        y = 120
-        row_height = 30
+        # Display skills with scrolling (using pages of 12 skills)
+        page_size = 12
+        num_pages = (len(skills) + page_size - 1) // page_size
+        self.handbook_page = max(0, min(self.handbook_page, num_pages - 1))
         
-        for elem, skills in groups.items():
-            self.draw_text(f"【{elem}系功法】", self.font, ELEMENTS.get(elem, {}).get("color", INK_BLACK), start_x, y)
-            y += row_height
+        start_idx = self.handbook_page * page_size
+        end_idx = min(start_idx + page_size, len(skills))
+        
+        y = 200
+        for i in range(start_idx, end_idx):
+            name, tech = skills[i]
+            info = f"{name} | {tech.get('type', '未知')} | Dmg:{tech.get('damage', 0)} | CD:{tech.get('cooldown', 0)/1000:.1f}s"
+            self.draw_text(info, self.font, INK_BLACK, 150, y)
+            self.draw_text(tech.get("desc", ""), self.small_font, GRAY, 700, y)
+            y += 40
             
-            for i, (name, tech) in enumerate(skills):
-                if y > SCREEN_HEIGHT - 100: break
-                
-                # 详细信息拼接
-                info = f"{name}"
-                if "damage" in tech: info += f" | 伤害:{tech['damage']}"
-                if "heal" in tech: info += f" | 治疗:{tech['heal']}"
-                if "shield" in tech: info += f" | 护盾:{tech['shield']}"
-                info += f" | 冷却:{tech.get('cooldown', 0)/1000:.1f}s"
-                
-                self.draw_text(info, self.small_font, INK_BLACK, start_x + 20, y)
-                self.draw_text(tech.get("desc", ""), self.small_font, GRAY, start_x + 500, y)
-                y += row_height
-            y += 20
-            
+        self.draw_text(f"第 {self.handbook_page + 1} / {max(1, num_pages)} 页 (左右键翻页, 上下切换属性)", self.small_font, INK_GRAY, SCREEN_WIDTH//2, SCREEN_HEIGHT - 80, center=True)
         self.draw_text("B 或 Esc 返回", self.font, INK_GRAY, SCREEN_WIDTH//2, SCREEN_HEIGHT - 40, center=True)
 
     def save_game(self):
