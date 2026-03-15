@@ -171,13 +171,24 @@ class Game:
         self.attack_target = None
         self.attack_anim = None
         
-        # Handbook state
-        self.handbook_tab = "金"
-        self.handbook_page = 0
-        
-        # Menu state
-        self.menu_selection_idx = 0
+        # Load portraits
+        self.portraits = {}
+        for elem in ["金", "木", "水", "火", "土"]:
+            try:
+                img = pygame.image.load(f"data/portraits/{elem.lower()}.png").convert_alpha()
+                self.portraits[elem] = pygame.transform.scale(img, (300, 300))
+            except:
+                self.portraits[elem] = None
         self.menu_buttons = []
+        
+        # Load portraits
+        self.portraits = {}
+        for elem in ["金", "木", "水", "火", "土"]:
+            try:
+                img = pygame.image.load(f"data/portraits/{elem}.png").convert_alpha()
+                self.portraits[elem] = pygame.transform.scale(img, (300, 300))
+            except:
+                self.portraits[elem] = None
         
         # 突破相关
         self.breakthrough_boss = None
@@ -610,17 +621,16 @@ class Game:
                     return
         
         elif self.state == "char_selection":
-            # 检查角色按钮
-            for elem, rect in getattr(self, 'char_buttons', []):
+            # 导航按钮
+            for name, rect in self.char_nav_buttons:
                 if rect[0] < pos[0] < rect[0] + rect[2] and rect[1] < pos[1] < rect[1] + rect[3]:
-                    self.start_game(elem)
-                    return
-            
-            # 返回按钮
-            if hasattr(self, 'back_btn'):
-                b = self.back_btn
-                if b[0] < pos[0] < b[0] + b[2] and b[1] < pos[1] < b[1] + b[3]:
-                    self.state = "menu"
+                    if name == "prev": 
+                        self.char_selection_idx = (self.char_selection_idx - 1) % len(CHARACTERS)
+                    elif name == "next":
+                        self.char_selection_idx = (self.char_selection_idx + 1) % len(CHARACTERS)
+                    elif name == "select":
+                        elem = list(CHARACTERS.keys())[self.char_selection_idx]
+                        self.start_game(elem)
                     return
 
         # 游戏菜单点击
@@ -793,6 +803,15 @@ class Game:
         elif key == pygame.K_RETURN and self.state == "menu":
              # This block might be redundant but keeping logic consistent
              pass
+
+        elif self.state == "char_selection":
+            if key == pygame.K_LEFT:
+                self.char_selection_idx = (self.char_selection_idx - 1) % len(CHARACTERS)
+            elif key == pygame.K_RIGHT:
+                self.char_selection_idx = (self.char_selection_idx + 1) % len(CHARACTERS)
+            elif key == pygame.K_RETURN:
+                elem = list(CHARACTERS.keys())[self.char_selection_idx]
+                self.start_game(elem)
 
         if self.state == "game":
             if key == pygame.K_b:
@@ -1173,6 +1192,9 @@ class Game:
             self.draw_text(label, self.font, label_color, SCREEN_WIDTH//2, 275 + i * 70, center=True)
             self.menu_buttons.append((name, rect))
 
+    def split_text(self, text, length):
+        return [text[i:i+length] for i in range(0, len(text), length)]
+
     def draw_char_selection(self):
         # 绘制背景
         if self.bg_image:
@@ -1180,37 +1202,40 @@ class Game:
         else:
             self.screen.fill(PAPER)
 
-        self.draw_text("选择人物", self.title_font, RED, SCREEN_WIDTH//2, 80, center=True)
+        # Draw character portrait
+        elem_keys = list(CHARACTERS.keys())
+        current_elem = elem_keys[self.char_selection_idx]
+        char = CHARACTERS[current_elem]
         
-        char_buttons = []
-        elem_colors = {"金": (200, 180, 50), "木": (50, 180, 50), "水": (50, 100, 200), 
-                       "火": (220, 60, 40), "土": (180, 140, 80)}
+        # Left: Portrait + Name
+        if self.portraits.get(current_elem):
+            self.screen.blit(self.portraits[current_elem], (100, 200))
+        self.draw_text(char["name"], self.title_font, INK_BLACK, 250, 550, center=True)
         
-        for i, (elem, char) in enumerate(CHARACTERS.items()):
-            x = 100 + i * 200
-            y = 250
-            w, h = 160, 150
+        # Right-Top: Story
+        self.draw_text("背景故事", self.title_font, RED, 800, 200, center=True)
+        desc_lines = self.split_text(char["desc"], 15)
+        for i, line in enumerate(desc_lines):
+            self.draw_text(line, self.font, INK_BLACK, 800, 260 + i * 35, center=True)
             
-            color = elem_colors[elem]
-            pygame.draw.rect(self.screen, color, (x, y, w, h), 3)
-            pygame.draw.rect(self.screen, PAPER, (x+3, y+3, w-6, h-6))
-            
-            self.draw_text(char["name"], self.font, color, x + w//2, y + 25, center=True)
-            self.draw_text(f"{elem}系", self.small_font, INK_BLACK, x + w//2, y + 50, center=True)
-            self.draw_text(f"攻{char['base_attack']} 防{char['base_defense']} 血{char['base_hp']}", self.small_font, GRAY, x + w//2, y + 75, center=True)
-            # 绘制简介 (限制长度)
-            desc = char["desc"][:15] + "..." if len(char["desc"]) > 15 else char["desc"]
-            self.draw_text(desc, self.small_font, INK_GRAY, x + w//2, y + 110, center=True)
-            
-            char_buttons.append((elem, (x, y, w, h)))
+        # Right-Bottom: Stats
+        self.draw_text("角色属性", self.title_font, RED, 800, 450, center=True)
+        self.draw_text(f"属性: {char['element']}", self.font, INK_BLACK, 800, 500, center=True)
+        self.draw_text(f"初始攻击: {char['base_attack']}", self.font, INK_BLACK, 800, 530, center=True)
+        self.draw_text(f"初始防御: {char['base_defense']}", self.font, INK_BLACK, 800, 560, center=True)
+        self.draw_text(f"初始气血: {char['base_hp']}", self.font, INK_BLACK, 800, 590, center=True)
         
-        self.char_buttons = char_buttons
+        # Navigation
+        prev_btn = (100, 650, 100, 50)
+        next_btn = (300, 650, 100, 50)
+        select_btn = (800, 650, 120, 50)
         
-        back_btn = (SCREEN_WIDTH//2 - 60, SCREEN_HEIGHT - 100, 120, 50)
-        pygame.draw.rect(self.screen, PAPER, back_btn)
-        pygame.draw.rect(self.screen, INK_BLACK, back_btn, 2)
-        self.draw_text("返回", self.font, INK_BLACK, back_btn[0]+60, back_btn[1]+25, center=True)
-        self.back_btn = back_btn
+        for btn, text in [(prev_btn, "上一个"), (next_btn, "下一个"), (select_btn, "选择")]:
+            pygame.draw.rect(self.screen, PAPER, btn)
+            pygame.draw.rect(self.screen, INK_BLACK, btn, 2)
+            self.draw_text(text, self.font, INK_BLACK, btn[0]+50, btn[1]+25, center=True)
+        
+        self.char_nav_buttons = [("prev", prev_btn), ("next", next_btn), ("select", select_btn)]
     
     def draw_game(self):
         if not self.player: return
