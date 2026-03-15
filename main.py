@@ -175,10 +175,13 @@ class Game:
         self.portraits = {}
         portrait_files = {"金": "jin.png", "木": "mu.png", "水": "shui.png", "火": "huo.png", "土": "tu.png"}
         for elem, filename in portrait_files.items():
+            path = f"data/portraits/{filename}"
             try:
-                img = pygame.image.load(f"data/portraits/{filename}").convert_alpha()
+                img = pygame.image.load(path).convert_alpha()
                 self.portraits[elem] = pygame.transform.scale(img, (300, 300))
-            except:
+                print(f"DEBUG: Successfully loaded portrait: {path}")
+            except Exception as e:
+                print(f"DEBUG: Failed to load portrait {path}: {e}")
                 self.portraits[elem] = None
         
         # Menu state
@@ -1197,6 +1200,11 @@ class Game:
         # 绘制背景
         if self.bg_image:
             self.screen.blit(self.bg_image, (0, 0))
+            # 增加遮罩层，让文字更清晰
+            overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+            overlay.set_alpha(150)
+            overlay.fill((0, 0, 0))
+            self.screen.blit(overlay, (0, 0))
         else:
             self.screen.fill(PAPER)
 
