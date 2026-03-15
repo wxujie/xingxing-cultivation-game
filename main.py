@@ -199,6 +199,12 @@ class Game:
         # 游戏数据
         self.map_seed = random.randint(0, 10000)
         self.game_time = 0
+        
+        # Load background
+        try:
+            self.bg_image = pygame.image.load("data/menu_bg.png").convert()
+        except:
+            self.bg_image = None
 
     def trigger_attack_anim(self, target_x, target_y, skill_type):
         self.attack_anim = {
@@ -1093,14 +1099,16 @@ class Game:
         self.draw_text("Esc 退出", self.font, GRAY, SCREEN_WIDTH//2, 480, center=True)
 
     def draw_menu(self):
-        # 水墨风格背景 - 宣纸质感
-        self.screen.fill(PAPER)
-        
-        # 背景装饰 - 墨点
-        for _ in range(15):
-            x = random.randint(0, SCREEN_WIDTH)
-            y = random.randint(0, SCREEN_HEIGHT)
-            pygame.draw.circle(self.screen, INK_GRAY, (x, y), random.randint(1, 3))
+        # 绘制背景
+        if self.bg_image:
+            self.screen.blit(self.bg_image, (0, 0))
+        else:
+            self.screen.fill(PAPER)
+            # 背景装饰 - 墨点
+            for _ in range(15):
+                x = random.randint(0, SCREEN_WIDTH)
+                y = random.randint(0, SCREEN_HEIGHT)
+                pygame.draw.circle(self.screen, INK_GRAY, (x, y), random.randint(1, 3))
         
         # 标题 - 书法风格
         self.draw_text("杏杏修仙录", self.title_font, RED, SCREEN_WIDTH//2, 80, center=True)
