@@ -175,20 +175,17 @@ class Game:
         self.portraits = {}
         for elem in ["金", "木", "水", "火", "土"]:
             try:
-                img = pygame.image.load(f"data/portraits/{elem.lower()}.png").convert_alpha()
-                self.portraits[elem] = pygame.transform.scale(img, (300, 300))
-            except:
-                self.portraits[elem] = None
-        self.menu_buttons = []
-        
-        # Load portraits
-        self.portraits = {}
-        for elem in ["金", "木", "水", "火", "土"]:
-            try:
                 img = pygame.image.load(f"data/portraits/{elem}.png").convert_alpha()
                 self.portraits[elem] = pygame.transform.scale(img, (300, 300))
             except:
                 self.portraits[elem] = None
+        
+        # Menu state
+        self.menu_buttons = []
+        self.menu_selection_idx = 0
+        self.handbook_tab = "金"
+        self.handbook_page = 0
+        self.char_selection_idx = 0
         
         # 突破相关
         self.breakthrough_boss = None
