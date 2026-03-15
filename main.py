@@ -707,6 +707,26 @@ class Game:
                 if rect[0] < pos[0] < rect[0] + rect[2] and rect[1] < pos[1] < rect[1] + rect[3]:
                     self.confirm_purchase(name == "yes")
                     return
+
+        # 技能图鉴点击
+        elif self.state == "handbook":
+            # 返回按钮
+            if SCREEN_WIDTH//2 - 60 < pos[0] < SCREEN_WIDTH//2 + 60 and SCREEN_HEIGHT - 60 < pos[1] < SCREEN_HEIGHT - 20:
+                self.state = 'game'
+            # 标签页切换
+            tabs = ["金", "木", "水", "火", "土", "无"]
+            for i, tab in enumerate(tabs):
+                rect = (100 + i * 150, 120, 140, 40)
+                if rect[0] < pos[0] < rect[0] + rect[2] and rect[1] < pos[1] < rect[1] + rect[3]:
+                    self.handbook_tab = tab
+                    self.handbook_page = 0
+            # 翻页按钮
+            prev_btn = (SCREEN_WIDTH//2 - 120, SCREEN_HEIGHT - 100, 100, 40)
+            next_btn = (SCREEN_WIDTH//2 + 20, SCREEN_HEIGHT - 100, 100, 40)
+            if prev_btn[0] < pos[0] < prev_btn[0] + prev_btn[2] and prev_btn[1] < pos[1] < prev_btn[1] + prev_btn[3]:
+                self.handbook_page = max(0, self.handbook_page - 1)
+            elif next_btn[0] < pos[0] < next_btn[0] + next_btn[2] and next_btn[1] < pos[1] < next_btn[1] + next_btn[3]:
+                self.handbook_page += 1
         
         # 死亡界面
         elif self.state == "dead":
@@ -1417,8 +1437,24 @@ class Game:
             self.draw_text(tech.get("desc", ""), self.small_font, GRAY, 700, y)
             y += 40
             
-        self.draw_text(f"第 {self.handbook_page + 1} / {max(1, num_pages)} 页 (左右键翻页, 上下切换属性)", self.small_font, INK_GRAY, SCREEN_WIDTH//2, SCREEN_HEIGHT - 80, center=True)
-        self.draw_text("B 或 Esc 返回", self.font, INK_GRAY, SCREEN_WIDTH//2, SCREEN_HEIGHT - 40, center=True)
+        # Draw navigation buttons
+        prev_btn = (SCREEN_WIDTH//2 - 120, SCREEN_HEIGHT - 110, 100, 40)
+        next_btn = (SCREEN_WIDTH//2 + 20, SCREEN_HEIGHT - 110, 100, 40)
+        
+        pygame.draw.rect(self.screen, (220, 220, 220), prev_btn)
+        pygame.draw.rect(self.screen, (220, 220, 220), next_btn)
+        pygame.draw.rect(self.screen, INK_BLACK, prev_btn, 2)
+        pygame.draw.rect(self.screen, INK_BLACK, next_btn, 2)
+        self.draw_text("上一页", self.small_font, INK_BLACK, prev_btn[0]+50, prev_btn[1]+20, center=True)
+        self.draw_text("下一页", self.small_font, INK_BLACK, next_btn[0]+50, next_btn[1]+20, center=True)
+            
+        self.draw_text(f"第 {self.handbook_page + 1} / {max(1, num_pages)} 页", self.small_font, INK_GRAY, SCREEN_WIDTH//2, SCREEN_HEIGHT - 70, center=True)
+        
+        # 返回按钮
+        back_btn = (SCREEN_WIDTH//2 - 60, SCREEN_HEIGHT - 60, 120, 40)
+        pygame.draw.rect(self.screen, (220, 220, 220), back_btn)
+        pygame.draw.rect(self.screen, INK_BLACK, back_btn, 2)
+        self.draw_text("返回 (B)", self.font, INK_BLACK, back_btn[0]+60, back_btn[1]+20, center=True)
 
     def save_game(self):
         data = {
