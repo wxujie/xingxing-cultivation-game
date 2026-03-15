@@ -1216,20 +1216,20 @@ class Game:
         # Left: Portrait + Name
         if self.portraits.get(current_elem):
             self.screen.blit(self.portraits[current_elem], (100, 200))
-        self.draw_text(char["name"], self.title_font, INK_BLACK, 250, 550, center=True)
+        self.draw_text(char["name"], self.title_font, WHITE, 250, 550, center=True)
         
         # Right-Top: Story
         self.draw_text("背景故事", self.title_font, RED, 800, 200, center=True)
         desc_lines = self.split_text(char["desc"], 15)
         for i, line in enumerate(desc_lines):
-            self.draw_text(line, self.font, INK_BLACK, 800, 260 + i * 35, center=True)
+            self.draw_text(line, self.font, WHITE, 800, 260 + i * 35, center=True)
             
         # Right-Bottom: Stats
         self.draw_text("角色属性", self.title_font, RED, 800, 450, center=True)
-        self.draw_text(f"属性: {char['element']}", self.font, INK_BLACK, 800, 500, center=True)
-        self.draw_text(f"初始攻击: {char['base_attack']}", self.font, INK_BLACK, 800, 530, center=True)
-        self.draw_text(f"初始防御: {char['base_defense']}", self.font, INK_BLACK, 800, 560, center=True)
-        self.draw_text(f"初始气血: {char['base_hp']}", self.font, INK_BLACK, 800, 590, center=True)
+        self.draw_text(f"属性: {char['element']}", self.font, WHITE, 800, 500, center=True)
+        self.draw_text(f"初始攻击: {char['base_attack']}", self.font, WHITE, 800, 530, center=True)
+        self.draw_text(f"初始防御: {char['base_defense']}", self.font, WHITE, 800, 560, center=True)
+        self.draw_text(f"初始气血: {char['base_hp']}", self.font, WHITE, 800, 590, center=True)
         
         # Navigation
         prev_btn = (100, 650, 100, 50)
