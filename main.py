@@ -313,6 +313,7 @@ class Game:
         # 攻击逻辑 (统一方法，方便调用)
         skill = self.player.use_skill(TECHNIQUES)
         if skill:
+            self.player.state = "Casting" if skill["type"] == "heal" else "Attacking"
             if skill["type"] == "attack":
                 damage = skill.get("damage", 0)
                 target.take_damage(damage)
@@ -323,9 +324,13 @@ class Game:
                 self.show_message(f"治疗术 +{skill['heal']}!")
                 self.spawn_attack_particles(self.player.x, self.player.y, GREEN)
         else:
+            self.player.state = "Attacking"
             dmg = self.player.attack
             target.take_damage(dmg)
             self.spawn_attack_particles(target.x, target.y, WHITE)
+        
+        # Reset state after a short delay
+        pygame.time.set_timer(pygame.USEREVENT + 1, 500)
         
         # 处理死亡奖励
         if not target.is_alive():
@@ -1025,8 +1030,14 @@ class Game:
             
             # Map state to row
             state_map = {"Idle": 0, "Walking": 1, "Attacking": 2, "Casting": 3}
-            row = state_map.get(self.player.state, 0)
+            new_row = state_map.get(self.player.state, 0)
             
+            # Reset frame if state changed
+            if not hasattr(self.player, '_last_row') or self.player._last_row != new_row:
+                self.player.anim_frame = 0
+            self.player._last_row = new_row
+            
+            row = new_row
             col = (self.player.anim_frame // 10) % 4
             rect = pygame.Rect(col * frame_width, row * frame_height, frame_width, frame_height)
             self.screen.blit(self.shui_spritesheet, (x - frame_width // 2, y - frame_height // 2), rect)
@@ -1636,6 +1647,8 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                elif event.type == pygame.USEREVENT + 1:
+                    if self.player: self.player.state = "Idle"
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     self.handle_click(event.pos)
                 elif event.type == pygame.KEYDOWN:
