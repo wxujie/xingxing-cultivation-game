@@ -605,6 +605,8 @@ class Game:
             
             if moved:
                 self.player.state = "Walking"
+                if dx > 0: self.player.direction = 1
+                elif dx < 0: self.player.direction = -1
                 self.move_target = None  # 取消鼠标移动
                 self.player.move(dx, dy, WORLD_WIDTH, WORLD_HEIGHT)
                 if random.random() < 0.3:
@@ -616,6 +618,8 @@ class Game:
             elif self.move_target:
                 self.player.state = "Walking"
                 # 自动移动到目标
+                if self.move_target[0] > self.player.x: self.player.direction = 1
+                elif self.move_target[0] < self.player.x: self.player.direction = -1
                 self.update_movement()
             else:
                 self.player.state = "Idle"
@@ -1040,8 +1044,17 @@ class Game:
             row = new_row
             col = (self.player.anim_frame // 10) % 4
             rect = pygame.Rect(col * frame_width, row * frame_height, frame_width, frame_height)
-            self.screen.blit(self.shui_spritesheet, (x - frame_width // 2, y - frame_height // 2), rect)
-            self.player.anim_frame += 1
+            
+            frame_img = self.shui_spritesheet.subsurface(rect)
+            
+            if self.player.direction == -1:
+                frame_img = pygame.transform.flip(frame_img, True, False)
+            
+            self.screen.blit(frame_img, (x - frame_width // 2, y - frame_height // 2))
+            
+            # Slow down animation
+            if pygame.time.get_ticks() % 3 == 0:
+                self.player.anim_frame += 1
             return
         
         # 呼吸动画
