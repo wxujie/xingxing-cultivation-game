@@ -1042,7 +1042,12 @@ class Game:
             self.player._last_row = new_row
             
             row = new_row
-            col = (self.player.anim_frame // 10) % 4
+            # Walking has 6 frames, others 4
+            num_cols = 6 if self.player.state == "Walking" else 4
+            col = (self.player.anim_frame // 10) % num_cols
+            frame_width = self.shui_spritesheet.get_width() // 6
+            frame_height = self.shui_spritesheet.get_height() // 4
+            
             rect = pygame.Rect(col * frame_width, row * frame_height, frame_width, frame_height)
             
             frame_img = self.shui_spritesheet.subsurface(rect)
@@ -1050,7 +1055,7 @@ class Game:
             if self.player.direction == -1:
                 frame_img = pygame.transform.flip(frame_img, True, False)
             
-            self.screen.blit(frame_img, (x - frame_width // 2, y - frame_height // 2))
+            self.screen.blit(frame_img, (x - frame_width // 2, y - frame_height))
             
             # Slow down animation
             if pygame.time.get_ticks() % 3 == 0:
