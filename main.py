@@ -224,7 +224,7 @@ class Game:
         
         # Load spritesheet
         try:
-            self.shui_spritesheet = pygame.image.load("data/shui_spritesheet.png").convert_alpha()
+            self.shui_spritesheet = pygame.image.load("data/shui_spritesheet_nobg.png").convert_alpha()
             self.shui_spritesheet = pygame.transform.scale(self.shui_spritesheet, (400, 400)) # Simple scale
         except:
             self.shui_spritesheet = None
@@ -599,6 +599,7 @@ class Game:
                 moved = True
             
             if moved:
+                self.player.state = "Walking"
                 self.move_target = None  # 取消鼠标移动
                 self.player.move(dx, dy, WORLD_WIDTH, WORLD_HEIGHT)
                 if random.random() < 0.3:
@@ -608,8 +609,11 @@ class Game:
                         (100, 150, 200), 0.5, 20
                     ))
             elif self.move_target:
+                self.player.state = "Walking"
                 # 自动移动到目标
                 self.update_movement()
+            else:
+                self.player.state = "Idle"
     
     def spawn_attack_particles(self, x, y, color):
         for _ in range(8):
@@ -1018,13 +1022,17 @@ class Game:
             # Use self.player.anim_frame to animate
             frame_width = self.shui_spritesheet.get_width() // 4
             frame_height = self.shui_spritesheet.get_height() // 4
+            
+            # Map state to row
+            state_map = {"Idle": 0, "Walking": 1, "Attacking": 2, "Casting": 3}
+            row = state_map.get(self.player.state, 0)
+            
             col = (self.player.anim_frame // 10) % 4
-            row = 0
             rect = pygame.Rect(col * frame_width, row * frame_height, frame_width, frame_height)
             self.screen.blit(self.shui_spritesheet, (x - frame_width // 2, y - frame_height // 2), rect)
             self.player.anim_frame += 1
             return
-
+        
         # 呼吸动画
         breath_offset = math.sin(pygame.time.get_ticks() * 0.003) * 2
         
