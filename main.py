@@ -222,12 +222,18 @@ class Game:
         except:
             self.bg_image = None
         
-        # Load spritesheet
-        try:
-            self.shui_spritesheet = pygame.image.load("data/shui_spritesheet_nobg.png").convert_alpha()
-            self.shui_spritesheet = pygame.transform.scale(self.shui_spritesheet, (400, 400)) # Simple scale
-        except:
-            self.shui_spritesheet = None
+        # Load sprites
+        self.shui_frames = {"Idle": [], "Walking": [], "Attacking": [], "Casting": []}
+        for state in self.shui_frames:
+            # Need to get count. Idle/Attack/Cast=4, Walk=6
+            count = 6 if state == "Walking" else 4
+            for i in range(count):
+                try:
+                    frame = pygame.image.load(f"data/shui_frames/{state}_{i}.png").convert_alpha()
+                    # Scale uniformly to something reasonable, e.g. 256x256
+                    self.shui_frames[state].append(pygame.transform.scale(frame, (256, 256)))
+                except:
+                    pass
 
     def trigger_attack_anim(self, target_x, target_y, skill_type):
         self.attack_anim = {
@@ -1026,43 +1032,24 @@ class Game:
     
     def draw_player_model(self, x, y):
         """绘制玩家角色模型 - 水墨武侠风格"""
-        if self.player.element == "水" and self.shui_spritesheet:
-            # Simple spritesheet rendering for Shui
-            # Use self.player.anim_frame to animate
-            frame_width = self.shui_spritesheet.get_width() // 4
-            frame_height = self.shui_spritesheet.get_height() // 4
+        if self.player.element == "水" and self.shui_frames[self.player.state]:
+            frames = self.shui_frames[self.player.state]
+            frame_idx = (self.player.anim_frame // 10) % len(frames)
+            frame_img = frames[frame_idx]
             
-            # Map state to row
-            state_map = {"Idle": 0, "Walking": 1, "Attacking": 2, "Casting": 3}
-            new_row = state_map.get(self.player.state, 0)
-            
-            # Reset frame if state changed
-            if not hasattr(self.player, '_last_row') or self.player._last_row != new_row:
-                self.player.anim_frame = 0
-            self.player._last_row = new_row
-            
-            row = new_row
-            # Dynamic frame settings
-            num_cols = 6 if self.player.state == "Walking" else 4
-            frame_width = self.shui_spritesheet.get_width() // num_cols
-            frame_height = self.shui_spritesheet.get_height() // 4
-            
-            col = (self.player.anim_frame // 10) % num_cols
-            rect = pygame.Rect(col * frame_width, row * frame_height, frame_width, frame_height)
-            
-            frame_img = self.shui_spritesheet.subsurface(rect)
-            
+            # Flip if facing left
             if self.player.direction == -1:
                 frame_img = pygame.transform.flip(frame_img, True, False)
             
-            self.screen.blit(frame_img, (x - frame_width // 2, y - frame_height))
+            # Center at (x, y) - adjust based on frame size (256x256)
+            self.screen.blit(frame_img, (x - 128, y - 256))
             
             # Slow down animation
             if pygame.time.get_ticks() % 3 == 0:
                 self.player.anim_frame += 1
             return
         
-        # 呼吸动画
+        # 呼吸动画 (default drawing)
         breath_offset = math.sin(pygame.time.get_ticks() * 0.003) * 2
         
         # 御剑 (脚下的剑)
