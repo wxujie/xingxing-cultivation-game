@@ -1042,12 +1042,12 @@ class Game:
             self.player._last_row = new_row
             
             row = new_row
-            # Walking has 6 frames, others 4
+            # Dynamic frame settings
             num_cols = 6 if self.player.state == "Walking" else 4
-            col = (self.player.anim_frame // 10) % num_cols
-            frame_width = self.shui_spritesheet.get_width() // 6
+            frame_width = self.shui_spritesheet.get_width() // num_cols
             frame_height = self.shui_spritesheet.get_height() // 4
             
+            col = (self.player.anim_frame // 10) % num_cols
             rect = pygame.Rect(col * frame_width, row * frame_height, frame_width, frame_height)
             
             frame_img = self.shui_spritesheet.subsurface(rect)
