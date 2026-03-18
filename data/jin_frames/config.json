@@ -1,0 +1,12 @@
+{
+  "name": "剑痴·厉沧海",
+  "frames_per_state": {
+    "Idle": 4,
+    "Walking": 6,
+    "Attacking": 4,
+    "Casting": 4
+  },
+  "frame_size": 256,
+  "spritesheet": "data/jin_spritesheet.png",
+  "output_dir": "data/jin_frames"
+}
