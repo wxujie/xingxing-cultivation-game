@@ -44,6 +44,7 @@ class Player:
         # 动画
         self.anim_frame = 0
         self.state = "Idle" # Idle, Walking, Attacking, Casting
+        self.anim_timer = 0 # 动画计时器
         self.direction = 1 # 1 for right, -1 for left
 
     def move(self, dx, dy, world_width, world_height):

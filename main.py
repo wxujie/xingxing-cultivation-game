@@ -333,7 +333,13 @@ class Game:
         # 攻击逻辑 (统一方法，方便调用)
         skill = self.player.use_skill(TECHNIQUES)
         if skill:
-            self.player.state = "Casting" if skill["type"] == "heal" else "Attacking"
+            if self.player.techniques and self.player.current_skill == self.player.techniques[0]:
+                self.player.state = "Attacking"
+            else:
+                self.player.state = "Casting"
+            self.player.anim_timer = 30
+            self.player.anim_frame = 0
+            
             if skill["type"] == "attack":
                 damage = skill.get("damage", 0)
                 target.take_damage(damage)
@@ -345,6 +351,8 @@ class Game:
                 self.spawn_attack_particles(self.player.x, self.player.y, GREEN)
         else:
             self.player.state = "Attacking"
+            self.player.anim_timer = 30
+            self.player.anim_frame = 0
             dmg = self.player.attack
             target.take_damage(dmg)
             self.spawn_attack_particles(target.x, target.y, WHITE)
@@ -421,6 +429,9 @@ class Game:
         if self.state != "game" or self.player is None:
             return
         
+        if self.player.anim_timer > 0:
+            self.player.anim_timer -= 1
+        
         self.game_time += 1
         
         # 粒子更新
@@ -443,6 +454,14 @@ class Game:
             if not targets:
                 continue
             
+            # 设置角色动画状态
+            if self.player.techniques and tech_name == self.player.techniques[0]:
+                self.player.state = "Attacking"
+            else:
+                self.player.state = "Casting"
+            self.player.anim_timer = 30  # 动画持续时间(帧)
+            self.player.anim_frame = 0   # 重置动画帧
+
             # 应用五行加成
             damage = skill.get("damage", 0)
             if skill["element"] == self.player.element:
@@ -624,7 +643,8 @@ class Game:
                 moved = True
             
             if moved:
-                self.player.state = "Walking"
+                if self.player.anim_timer <= 0:
+                    self.player.state = "Walking"
                 if dx > 0: self.player.direction = 1
                 elif dx < 0: self.player.direction = -1
                 self.move_target = None  # 取消鼠标移动
@@ -636,13 +656,15 @@ class Game:
                         (100, 150, 200), 0.5, 20
                     ))
             elif self.move_target:
-                self.player.state = "Walking"
+                if self.player.anim_timer <= 0:
+                    self.player.state = "Walking"
                 # 自动移动到目标
                 if self.move_target[0] > self.player.x: self.player.direction = 1
                 elif self.move_target[0] < self.player.x: self.player.direction = -1
                 self.update_movement()
             else:
-                self.player.state = "Idle"
+                if self.player.anim_timer <= 0:
+                    self.player.state = "Idle"
     
     def spawn_attack_particles(self, x, y, color):
         for _ in range(8):
@@ -1057,12 +1079,14 @@ class Game:
                 if self.player.direction == -1:
                     frame_img = pygame.transform.flip(frame_img, True, False)
 
-                # Center at (x, y) - adjust based on frame size (256x256)
-                self.screen.blit(frame_img, (x - 128, y - 256))
+                # Center at bottom
+                rect = frame_img.get_rect()
+                rect.midbottom = (x, y)
+                self.screen.blit(frame_img, rect)
 
-                # Slow down animation
-                if pygame.time.get_ticks() % 3 == 0:
-                    self.player.anim_frame += 1
+                # 根据状态调整动画速度
+                anim_speed = 2 if self.player.state in ["Attacking", "Casting"] else 1
+                self.player.anim_frame += anim_speed
                 return
 
         # 其他角色使用水墨风格
@@ -1075,12 +1099,14 @@ class Game:
             if self.player.direction == -1:
                 frame_img = pygame.transform.flip(frame_img, True, False)
 
-            # Center at (x, y) - adjust based on frame size (256x256)
-            self.screen.blit(frame_img, (x - 128, y - 256))
+            # Center at bottom
+            rect = frame_img.get_rect()
+            rect.midbottom = (x, y)
+            self.screen.blit(frame_img, rect)
 
-            # Slow down animation
-            if pygame.time.get_ticks() % 3 == 0:
-                self.player.anim_frame += 1
+            # 根据状态调整动画速度
+            anim_speed = 2 if self.player.state in ["Attacking", "Casting"] else 1
+            self.player.anim_frame += anim_speed
             return
 
         # 呼吸动画 (default drawing)

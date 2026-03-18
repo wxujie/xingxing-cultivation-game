@@ -41,6 +41,11 @@ class JinAnimationLoader:
                 filename = os.path.join(output_dir, f"{state}_{i}.png")
                 try:
                     frame = pygame.image.load(filename).convert_alpha()
+                    # 默认素材朝向与游戏相反，翻转之
+                    frame = pygame.transform.flip(frame, True, False)
+                    # 缩小30% (即设为原来的70%)
+                    w, h = frame.get_size()
+                    frame = pygame.transform.scale(frame, (int(w * 0.7), int(h * 0.7)))
                     self.frames[state].append(frame)
                     print(f"  ✓ {filename}")
                 except Exception as e:
