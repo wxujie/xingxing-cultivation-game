@@ -10,6 +10,7 @@ import math
 import json
 from entities import Player, Enemy, Particle
 from data_loader import load_all
+from jin_anim_loader import JinAnimationLoader
 
 # Initialize
 pygame.init()
@@ -234,6 +235,12 @@ class Game:
                     self.shui_frames[state].append(pygame.transform.scale(frame, (256, 256)))
                 except:
                     pass
+
+        # Load 剑痴·厉沧海 sprites
+        self.jin_anim = None
+        if os.path.exists("data/jin_frames"):
+            self.jin_anim = JinAnimationLoader()
+            print("✓ 剑痴·厉沧海动画已加载")
 
     def trigger_attack_anim(self, target_x, target_y, skill_type):
         self.attack_anim = {
@@ -1031,33 +1038,53 @@ class Game:
                 self.draw_text(f"冷却中: {remaining:.1f}秒", self.small_font, (255, 200, 100), x + 10, y + 155)
     
     def draw_player_model(self, x, y):
-        """绘制玩家角色模型 - 水墨武侠风格"""
+        """绘制玩家角色模型 - 剑痴·厉沧海使用雪碧图动画"""
+        # 剑痴·厉沧海使用雪碧图
+        if self.jin_anim and self.player.char_key == "金":
+            jin_frames = self.jin_anim.get_state_frames(self.player.state)
+            if jin_frames:
+                frame_idx = (self.player.anim_frame // 10) % len(jin_frames)
+                frame_img = jin_frames[frame_idx]
+
+                # Flip if facing left
+                if self.player.direction == -1:
+                    frame_img = pygame.transform.flip(frame_img, True, False)
+
+                # Center at (x, y) - adjust based on frame size (256x256)
+                self.screen.blit(frame_img, (x - 128, y - 256))
+
+                # Slow down animation
+                if pygame.time.get_ticks() % 3 == 0:
+                    self.player.anim_frame += 1
+                return
+
+        # 其他角色使用水墨风格
         if self.player.element == "水" and self.shui_frames[self.player.state]:
             frames = self.shui_frames[self.player.state]
             frame_idx = (self.player.anim_frame // 10) % len(frames)
             frame_img = frames[frame_idx]
-            
+
             # Flip if facing left
             if self.player.direction == -1:
                 frame_img = pygame.transform.flip(frame_img, True, False)
-            
+
             # Center at (x, y) - adjust based on frame size (256x256)
             self.screen.blit(frame_img, (x - 128, y - 256))
-            
+
             # Slow down animation
             if pygame.time.get_ticks() % 3 == 0:
                 self.player.anim_frame += 1
             return
-        
+
         # 呼吸动画 (default drawing)
         breath_offset = math.sin(pygame.time.get_ticks() * 0.003) * 2
-        
+
         # 御剑 (脚下的剑)
         if self.player.weapon:
             # 剑身
             pygame.draw.line(self.screen, (180, 180, 190), (x - 25, y + 15), (x + 25, y + 10), 4)
             pygame.draw.line(self.screen, CYAN, (x - 25, y + 15), (x + 25, y + 10), 2)
-        
+
         # 身体 (长袍)
         pygame.draw.polygon(self.screen, (60, 80, 140), [
             (x - 20, y + breath_offset),
@@ -1067,22 +1094,22 @@ class Game:
         ])
         # 腰带
         pygame.draw.rect(self.screen, GOLD, (x - 15, y + 8 + breath_offset, 30, 4))
-        
+
         # 手臂
         pygame.draw.circle(self.screen, (255, 220, 180), (x - 22, y + 5 + breath_offset), 8)
         pygame.draw.circle(self.screen, (255, 220, 180), (x + 22, y + 5 + breath_offset), 8)
-        
+
         # 头部
         pygame.draw.circle(self.screen, (255, 220, 180), (x, y - 12 + breath_offset), 16)
-        
+
         # 头发 (发髻)
         pygame.draw.circle(self.screen, INK_BLACK, (x, y - 20 + breath_offset), 14)
         pygame.draw.circle(self.screen, INK_BLACK, (x, y - 28 + breath_offset), 8)
-        
+
         # 眼睛
         pygame.draw.circle(self.screen, INK_BLACK, (x - 5, y - 14 + breath_offset), 2)
         pygame.draw.circle(self.screen, INK_BLACK, (x + 5, y - 14 + breath_offset), 2)
-        
+
         # 武器特效
         if self.player.weapon:
             quality = self.player.weapon.get("quality", "普通")

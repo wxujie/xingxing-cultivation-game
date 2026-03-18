@@ -5,3 +5,5 @@ dist/
 *.log
 .vscode/
 .idea/
+jin_frames/
+jin_spritesheet.png
