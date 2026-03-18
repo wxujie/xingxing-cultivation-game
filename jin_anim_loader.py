@@ -30,7 +30,7 @@ class JinAnimationLoader:
         for state in self.frames:
             count = {
                 "Idle": 4,
-                "Walking": 6,
+                "Walking": 4,
                 "Attacking": 4,
                 "Casting": 4
             }[state]
