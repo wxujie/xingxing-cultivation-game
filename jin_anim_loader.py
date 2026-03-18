@@ -6,6 +6,10 @@
 
 import pygame
 import os
+from pathlib import Path
+
+# 获取脚本所在目录
+SCRIPT_DIR = str(Path(__file__).parent)
 
 class JinAnimationLoader:
     """剑痴·厉沧海动画加载器"""
@@ -21,7 +25,7 @@ class JinAnimationLoader:
 
     def load_frames(self):
         """加载所有动画帧"""
-        output_dir = "data/jin_frames"
+        output_dir = os.path.join(SCRIPT_DIR, "data", "jin_frames")
 
         for state in self.frames:
             count = {

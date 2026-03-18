@@ -13,6 +13,9 @@ from entities import Player, Enemy, Particle
 from data_loader import load_all
 from jin_anim_loader import JinAnimationLoader
 
+# 获取脚本所在目录
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # Initialize
 pygame.init()
 
@@ -239,9 +242,12 @@ class Game:
 
         # Load 剑痴·厉沧海 sprites
         self.jin_anim = None
-        if os.path.exists("data/jin_frames"):
+        jin_frames_path = os.path.join(SCRIPT_DIR, "data", "jin_frames")
+        if os.path.exists(jin_frames_path):
             self.jin_anim = JinAnimationLoader()
             print("✓ 剑痴·厉沧海动画已加载")
+        else:
+            print(f"✗ 未找到剑痴动画文件: {jin_frames_path}")
 
     def trigger_attack_anim(self, target_x, target_y, skill_type):
         self.attack_anim = {
