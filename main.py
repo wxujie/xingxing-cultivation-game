@@ -8,6 +8,7 @@ import random
 import sys
 import math
 import json
+import os
 from entities import Player, Enemy, Particle
 from data_loader import load_all
 from jin_anim_loader import JinAnimationLoader
